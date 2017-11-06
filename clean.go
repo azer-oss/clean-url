@@ -36,12 +36,21 @@ func CleanQuery(query string) string {
 		return ""
 	}
 
-	result := regexp.MustCompile(`(\&|^)utm_[\w]+\=[^\&]+`).ReplaceAllString(query, "")
-	result = regexp.MustCompile(`(\&|^)ref\=[^\&]+`).ReplaceAllString(result, "")
-
-	if string(result[0]) == "&" {
-		result = result[1:]
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		return ""
 	}
 
-	return "?" + result
+	result := []string{}
+	for k, v := range values {
+		if k != "ref" && !strings.HasPrefix(k, "utm_") && len(v) > 0 && len(v[0]) > 0 {
+			result = append(result, fmt.Sprintf("%s=%s", k, v[0]))
+		}
+	}
+
+	if len(result) == 0 {
+		return ""
+	}
+
+	return fmt.Sprintf("?%s", strings.Join(result, "&"))
 }
