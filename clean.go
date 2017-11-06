@@ -8,7 +8,11 @@ import (
 )
 
 func Clean(raw string) string {
-	parsed, _ := url.Parse(raw)
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+
 	return strings.TrimSpace(fmt.Sprintf("%s%s%s",
 		CleanHost(parsed.Host),
 		CleanPath(parsed.Path),
